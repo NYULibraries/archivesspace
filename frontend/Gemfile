@@ -27,6 +27,7 @@ gem "json", "1.8.0"
 gem 'json-schema', '1.0.10'
 
 gem 'useragent'
+gem 'pry'
 
 gem "jruby-jars", "= 1.7.21"
 gem 'atomic', '= 1.0.1'
