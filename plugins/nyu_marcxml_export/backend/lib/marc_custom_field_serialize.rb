@@ -19,7 +19,7 @@ class MARCCustomFieldSerialize
   def datafields
     extra_fields = []
     extra_fields << DataField.new('853', '0', '0', [SubField.new('8','1'),SubField.new('a','Box')])
-     binding.remote_pry
+    tc = @record.aspace_record['top_containers']
     (@record.datafields + extra_fields).sort_by(&:tag)
 
   end
