@@ -7,9 +7,22 @@ class MARCCustomFieldSerialize
     @record = record
     #binding.remote_pry
   end
+   
+  def leader_string
+    result = @record.leader_string
+  end
 
-   def datafields
-      @record
-      binding.remote_pry
-   end
+  def controlfield_string
+    result = @record.controlfield_string
+  end
+
+  def datafields
+    extra_fields = []
+    extra_fields << DataField.new('853', '0', '0', [SubField.new('8','1'),SubField.new('a','Box')])
+    (@record.datafields + extra_fields).sort_by(&:tag)
+  end
+
+  #def add_853_tag
+   # DataField.new('853', '0', '0', [SubField.new('8','1'),SubField.new('a','Box')])
+  #end
 end
