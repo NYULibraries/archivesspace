@@ -18,7 +18,6 @@ class MARCCustomFieldSerialize
 
   def datafields
     add_853_tag
-    #extra_fields << DataField.new('853', '0', '0', [SubField.new('8','1'),SubField.new('a','Box')])
     top_containers = @record.aspace_record['top_containers']
     top_containers.each_pair { |barcode, indicator|
       add_863_tag(barcode,indicator)
@@ -66,7 +65,7 @@ class MARCCustomFieldSerialize
     j_id = j_other_ids.size == 0 ? j_id : j_other_ids
     sub_j = SubField.new('j',j_id)
     
-    sub_b = nil
+    subfields_b_c = {}
     sub_c = nil
     repo_code = {}
     case @record.aspace_record['repository']['_resolved']['repo_code']
@@ -82,15 +81,10 @@ class MARCCustomFieldSerialize
       repo_code = { b: "ERROR - unrecognized code" }
     end
     repo_code.each_key{ |code|
-     case code.to_s
-     when 'b'
-      sub_b = SubField.new(code,repo_code[code])
-     when 'c'
-      sub_c = SubField.new(code,repo_code[code])
-     end
+      subfields_b_c[code] = SubField.new(code,repo_code[code])
     }
     Extra_fields << DataField.new('949','0','',
-    [sub_a, sub_b, sub_c, sub_t, sub_j, sub_m, 
+    [sub_a, subfields_b_c[:b], subfields_b_c[:c], sub_t, sub_j, sub_m, 
       sub_i, sub_p, sub_w, sub_e])
   end
 end
