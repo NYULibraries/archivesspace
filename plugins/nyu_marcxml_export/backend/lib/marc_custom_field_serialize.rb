@@ -18,11 +18,13 @@ class MARCCustomFieldSerialize
 
   def datafields
     add_853_tag
-    top_containers = @record.aspace_record['top_containers']
-    top_containers.each_pair { |barcode, indicator|
-      add_863_tag(barcode,indicator)
-      add_949_tag(barcode, indicator)
-    }
+    if @record.aspace_record['top_containers']
+      top_containers = @record.aspace_record['top_containers']
+      top_containers.each_pair { |barcode, indicator|
+        add_863_tag(barcode,indicator)
+        add_949_tag(barcode, indicator)
+      }
+    end
     (@record.datafields + Extra_fields).sort_by(&:tag)
      
   end
@@ -45,6 +47,15 @@ class MARCCustomFieldSerialize
     # about location
     # can there be a top container without a barcode, without an indicator?
     # can there be archival objects without a top container?
+    subfields_hsh = {}
+    subfields_hsh[:a] = 'NNU'
+    subfields_hsh[:m] = 'MIXED'
+    subfields_hsh[:t] = '4'
+    subfields_hsh[:i] = '04'
+    subfields_hsh[:p] = barcode
+    subfields_hsh[:w] = "Box #{indicator}"
+    subfields_hsh[:e] = indicator
+=begin
     sub_a = SubField.new('a','NNU')
     sub_m = SubField.new('m','MIXED')
     sub_t = SubField.new('t','4')
@@ -52,6 +63,7 @@ class MARCCustomFieldSerialize
     sub_p = SubField.new('p', barcode)
     sub_w = SubField.new('w',"Box #{indicator}")
     sub_e = SubField.new('e',indicator)
+=end
     j_id = @record.aspace_record['id_0']
     j_other_ids = []
     if @record.aspace_record['id_1'] and @record.aspace_record['id_2'] and @record.aspace_record['id_3']
@@ -63,7 +75,7 @@ class MARCCustomFieldSerialize
     end
     # if no other ids, assign id_0 else assign the whole array of ids
     j_id = j_other_ids.size == 0 ? j_id : j_other_ids
-    sub_j = SubField.new('j',j_id)
+    subfields_hsh[:j] = j_id
     
     subfields_b_c = {}
     sub_c = nil
@@ -81,10 +93,16 @@ class MARCCustomFieldSerialize
       repo_code = { b: "ERROR - unrecognized code" }
     end
     repo_code.each_key{ |code|
-      subfields_b_c[code] = SubField.new(code,repo_code[code])
+      #subfields_b_c[code] = SubField.new(code,repo_code[code])
+       subfields_hsh[code] = repo_code[code]
     }
-    Extra_fields << DataField.new('949','0','',
-    [sub_a, subfields_b_c[:b], subfields_b_c[:c], sub_t, sub_j, sub_m, 
-      sub_i, sub_p, sub_w, sub_e])
+    subfield_list = []
+    subfields_hsh.each_pair { |code, value|
+      subfield_list << SubField.new(code,value)
+    }
+    #Extra_fields << DataField.new('949','0','',
+    #[sub_a, subfields_b_c[:b], subfields_b_c[:c], sub_t, sub_j, sub_m, 
+      #sub_i, sub_p, sub_w, sub_e])
+    Extra_fields << DataField.new('949','0','',subfield_list)
   end
 end
