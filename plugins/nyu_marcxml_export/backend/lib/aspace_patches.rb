@@ -9,10 +9,11 @@ module ExportHelpers
     related_objects = obj['tree']['_resolved']['children']
     #obj[:top_containers] = get_top_containers(related_objects) if related_objects
     tc = get_top_containers(related_objects) if related_objects
+    # will there always be location info for top containers
+    # will there always be info in the building field?
     if tc
       obj[:top_containers]= get_locations(tc) 
     end
-    binding.remote_pry
     marc = ASpaceExport.model(:marc21).from_resource(JSONModel(:resource).new(obj))
     ASpaceExport::serialize(marc)
   end
@@ -22,7 +23,7 @@ module ExportHelpers
   	related_objects.each { |r|
      	obj = resolve_references(ArchivalObject.to_jsonmodel(r['id']), ['top_container'])
       tc_id = obj['instances'][0]['sub_container']['top_container']['ref'].split('/')[4].to_i
-     	barcode =  obj['instances'][0]['sub_container']['top_container']['_resolved']['barcode'] if barcode
+     	barcode =  obj['instances'][0]['sub_container']['top_container']['_resolved']['barcode'] 
       indicator = obj['instances'][0]['sub_container']['top_container']['_resolved']['indicator'] 
      	bc = {barcode: barcode} if barcode
       unless indicator
@@ -40,9 +41,12 @@ module ExportHelpers
     tc = top_containers.dup
     top_containers.each_key { |t|
       obj = resolve_references(TopContainer.to_jsonmodel(t), ['container_locations'])
+      unless  obj['container_locations'][0]
+        raise "ERROR: Container information for top container: #{t} must exist"
+      end
       building = obj['container_locations'][0]['_resolved']['building']
       unless  building
-        raise "ERROR: Container information for top container: #{t} must exist"
+        raise "ERROR: Building information for top container: #{t} must exist"
       end
       location = {location: building} 
       tc[t] = top_containers[t].merge(location)
