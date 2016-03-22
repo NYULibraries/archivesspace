@@ -57,7 +57,7 @@ class MARCCustomFieldSerialize
     # since the subfield positions matter
     subfields_hsh[1] = {code: '8', value: "1.#{info[:indicator]}" }
     subfields_hsh[2] = {code: 'a', value: info[:indicator] }
-    subfields_hsh[3] = {code: 'p', value: info[:barcode] }  if info.has_key?(:barcode)
+    subfields_hsh[3] = {code: 'p', value: info[:barcode] }  if info[:barcode]
     subfield_list = get_subfields(subfields_hsh)
     
     Extra_fields << DataField.new('863', '', '', subfield_list)
@@ -75,7 +75,7 @@ class MARCCustomFieldSerialize
     subfields_hsh[10] = {code: 'w', value: "Box #{info[:indicator]}" }
     subfields_hsh[11] = {code: 'e', value: info[:indicator]}
     subfields_hsh[5] = check_multiple_ids 
-    subfields_hsh[8] = get_location(info[:location])
+    subfields_hsh[8] = get_location(info[:location]) if info[:location]
     # merge repo code hash with existing subfield code hash
     subfields_hsh.merge!(get_repo_code_value)
 

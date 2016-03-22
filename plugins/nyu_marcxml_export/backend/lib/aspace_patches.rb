@@ -49,15 +49,15 @@ module ExportHelpers
     tc = top_containers.dup
     top_containers.each_key { |t|
       obj = resolve_references(TopContainer.to_jsonmodel(t), ['container_locations'])
-      unless  obj['container_locations'][0]
-        raise "ERROR: Container information for top container: #{t} must exist"
+      if  obj['container_locations'][0]
+        building = obj['container_locations'][0]['_resolved']['building']
+        unless  building
+          raise "ERROR: Building information for top container: #{t} must exist"
+        end
+        location = {location: building} 
+        tc[t] = top_containers[t].merge(location)
       end
-      building = obj['container_locations'][0]['_resolved']['building']
-      unless  building
-        raise "ERROR: Building information for top container: #{t} must exist"
-      end
-      location = {location: building} 
-      tc[t] = top_containers[t].merge(location)
+      
     }
     tc
 
