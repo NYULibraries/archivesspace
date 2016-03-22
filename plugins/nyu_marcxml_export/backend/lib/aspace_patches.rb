@@ -49,6 +49,8 @@ module ExportHelpers
     tc = top_containers.dup
     top_containers.each_key { |t|
       obj = resolve_references(TopContainer.to_jsonmodel(t), ['container_locations'])
+      # if there's location information
+      # continue processing
       if  obj['container_locations'][0]
         building = obj['container_locations'][0]['_resolved']['building']
         unless  building
@@ -60,7 +62,6 @@ module ExportHelpers
       
     }
     tc
-
   end
 
 end
