@@ -2,7 +2,7 @@ class MARCCustomFieldSerialize
   ControlField = Struct.new(:tag, :text)
   DataField = Struct.new(:tag, :ind1, :ind2, :subfields)
   SubField = Struct.new(:code, :text)
-  Extra_fields = []
+
   def initialize(record)
     @record = record
  
@@ -17,16 +17,17 @@ class MARCCustomFieldSerialize
   end
 
   def datafields
-    add_853_tag
+    extra_fields = []
+    extra_fields << add_853_tag
     if @record.aspace_record['top_containers']
       top_containers = @record.aspace_record['top_containers']
-      top_containers.each_pair{ |id, info|
-        add_863_tag(info)
-        add_949_tag(info)
+      top_containers.each_key{ |id|
+        info = top_containers[id]
+        extra_fields << add_863_tag(info)
+        extra_fields << add_949_tag(info)
       }
     end
-    (@record.datafields + Extra_fields).sort_by(&:tag)
-     
+    (@record.datafields + extra_fields).sort_by(&:tag)
   end
 
   # sorts keys by order
@@ -48,7 +49,8 @@ class MARCCustomFieldSerialize
     subfields_hsh[1] = {code: '8', value: '1' }
     subfields_hsh[2] = {code: 'a', value: 'Box' }
     subfield_list = get_subfields(subfields_hsh)
-    Extra_fields << DataField.new('853', '0', '0', subfield_list)
+    #Extra_fields << DataField.new('853', '0', '0', subfield_list)
+    DataField.new('853', '0', '0', subfield_list)
   end
 
   def add_863_tag(info)
@@ -60,7 +62,7 @@ class MARCCustomFieldSerialize
     subfields_hsh[3] = {code: 'p', value: info[:barcode] }  if info[:barcode]
     subfield_list = get_subfields(subfields_hsh)
     
-    Extra_fields << DataField.new('863', '', '', subfield_list)
+    DataField.new('863', '', '', subfield_list)
   end
 
   def add_949_tag(info)
@@ -81,7 +83,7 @@ class MARCCustomFieldSerialize
 
     subfield_list = get_subfields(subfields_hsh)
     
-    Extra_fields << DataField.new('949','0','',subfield_list)
+    DataField.new('949','0','',subfield_list)
   end
 
   def get_repo_code_value
@@ -110,12 +112,13 @@ class MARCCustomFieldSerialize
   def check_multiple_ids
     j_id = @record.aspace_record['id_0']
     j_other_ids = []
-    if @record.aspace_record['id_1'] and @record.aspace_record['id_2'] and @record.aspace_record['id_3']
+    if @record.aspace_record['id_1'] or @record.aspace_record['id_2'] or @record.aspace_record['id_3']
       j_other_ids << @record.aspace_record['id_1']
       j_other_ids << @record.aspace_record['id_2']
       j_other_ids << @record.aspace_record['id_3']
-      j_other_ids.unshift(j_id)
-      j_other_ids.join(".")
+      j_other_ids.unshift(j_id) # adding the first id as the first element of the array
+      j_other_ids.compact!.join(".")
+      j_other_ids = j_other_ids.join(".")
     end
     # if no other ids, assign id_0 else assign the whole array of ids
     j_id = j_other_ids.size == 0 ? j_id : j_other_ids

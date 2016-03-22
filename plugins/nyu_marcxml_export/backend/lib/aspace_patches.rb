@@ -8,6 +8,7 @@ module ExportHelpers
     obj = resolve_references(Resource.to_jsonmodel(id), ['repository', 'linked_agents', 'subjects', 'tree'])
     related_objects = obj['tree']['_resolved']['children']
     containers = get_related_containers(related_objects) if related_objects
+
     if containers
       top_containers = get_top_containers(containers)
       obj[:top_containers]= get_locations(top_containers) 
