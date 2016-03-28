@@ -35,6 +35,8 @@ module ExportHelpers
         indicator = t['sub_container']['top_container']['_resolved']['indicator'] 
         bc = {barcode: barcode} if barcode
         ind = {indicator: indicator}
+        # if no barcode, just get indicator, 
+        # else, merge barcode with indicator in one hash
         tc_info = barcode.nil? ? ind : ind.merge(bc)
         top_containers[tc_id] = tc_info
       }

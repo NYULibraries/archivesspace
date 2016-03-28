@@ -32,8 +32,8 @@ describe 'NYU Custom Marcxml Export' do
      # create arbitrary indicator and barcode values
      let (:top_container) { create(:json_top_container) }
      let (:repo_code) { 'tamwag' }
+     let (:repo_id) { make_test_repo(code = repo_code) }
 	  before(:each) do
-	  	 repo_id = make_test_repo(code = repo_code)
 	  	 resource = create_resource_with_repo_id(repo_id)
 	  	 archival_object = create(:json_archival_object, 
 	  	  		                    "resource" => {"ref" => resource.uri},
@@ -57,12 +57,12 @@ describe 'NYU Custom Marcxml Export' do
      it "maps the top container barcode value to subfield 'p' if barcode exists" do
        @marc.should have_tag "datafield[@tag='863']/subfield[@code='p']" => "#{top_container.barcode}"
      end
-     # write a test to raise an error if indicator doesn't exist
+
   	  context 'there is no barcode in the top container' do
   		 let (:barcode)    { nil }
 	  	 let (:top_container) { create(:json_top_container, 'barcode' => barcode) }
 	  	 before(:each) do
-	  	  	resource = create_resource
+	  	   resource = create_resource_with_repo_id(repo_id)
 	  	  	archival_object = create(:json_archival_object, 
 	  	  		                      "resource" => {"ref" => resource.uri},
 	  	  	                         :level => "file", 
@@ -77,14 +77,16 @@ describe 'NYU Custom Marcxml Export' do
 
    describe 'datafield 949 mapping' do
    	let (:top_container) { create(:json_top_container) }
-   	before(:each) do
-	  	  	resource = create_resource
-	  	  	archival_object = create(:json_archival_object, 
-	  	  		                      "resource" => {"ref" => resource.uri},
-	  	  	                         :level => "file", 
-	  	  	                         "instances" => [build_instance(top_container)])
-	      @marc = get_marc(resource)
-	   end
+   	let (:repo_code) { 'tamwag' }
+   	let (:repo_id) { make_test_repo(code = repo_code) }
+   	let (:resource) { create_resource_with_repo_id(repo_id) }
+	   before(:each) do
+	  	  archival_object = create(:json_archival_object, 
+	  	  		                    "resource" => {"ref" => resource.uri},
+	  	  	                       :level => "file", 
+	  	  	                       "instances" => [build_instance(top_container)])
+	     @marc = get_marc(resource)
+	  end
 	   it "has the correct indicator attribute values" do
 	 	   @marc.should have_tag("datafield[@tag='949'][@ind1='0'][@ind2='']")
       end
@@ -117,11 +119,36 @@ describe 'NYU Custom Marcxml Export' do
         @marc.should have_tag "datafield[@tag='949']/subfield[@code='p']" => "#{top_container.barcode}"
       end
 
-      describe 'check repo code' do
-
-      	it "raises an error if repo code is not one of the allowed values" do
-        	  @marc.should have_tag "datafield[@tag='949']/subfield[@code='p']" => "#{top_container.barcode}"
-      	end
+      it "there is no subfield 's' if there's no location information" do
+         @marc.should_not have_tag ("datafield[@tag='949']/subfield[@code='s']")
    	end
+        
+      it "maps 'VH' if building location is 'Clancy Cullen' to subfield 's'" do
+         location = create(:json_location, :building => 'Clancy Cullen')
+         loc_hash = {'ref' => location.uri, 'status' => 'current', 'start_date' => '2000-01-01' }
+         loc_top_container = create(:json_top_container,
+        									  'container_locations' => [loc_hash]
+        								)
+	  	   loc_archival_object = create(:json_archival_object, 
+	  	  		                    "resource" => {"ref" => resource.uri},
+	  	  	                       :level => "file", 
+	  	  	                       "instances" => [build_instance(loc_top_container)])
+	      @marc = get_marc(resource)
+	      @marc.should have_tag "datafield[@tag='949']/subfield[@code='s']" => "VH"
+      end
+
+      it "maps '' to subfield 's' if location is other than Clancy Cullen" do
+      	location = create(:json_location, :building => 'foo')
+         loc_hash = {'ref' => location.uri, 'status' => 'current', 'start_date' => '2000-01-01' }
+         loc_top_container = create(:json_top_container,
+        									  'container_locations' => [loc_hash]
+        								)
+	  	   loc_archival_object = create(:json_archival_object, 
+	  	  		                    "resource" => {"ref" => resource.uri},
+	  	  	                       :level => "file", 
+	  	  	                       "instances" => [build_instance(loc_top_container)])
+	      @marc = get_marc(resource)
+	      @marc.should have_tag "datafield[@tag='949']/subfield[@code='s']" => ""
+      end
    end
 end
