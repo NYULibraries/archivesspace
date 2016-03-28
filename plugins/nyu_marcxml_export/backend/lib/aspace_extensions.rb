@@ -34,9 +34,6 @@ module ExportHelpers
         barcode =  t['sub_container']['top_container']['_resolved']['barcode'] 
         indicator = t['sub_container']['top_container']['_resolved']['indicator'] 
         bc = {barcode: barcode} if barcode
-        unless indicator
-          raise "ERROR: Indicator should exist"
-        end
         ind = {indicator: indicator}
         tc_info = barcode.nil? ? ind : ind.merge(bc)
         top_containers[tc_id] = tc_info
@@ -54,9 +51,6 @@ module ExportHelpers
       # continue processing
       if  obj['container_locations'][0]
         building = obj['container_locations'][0]['_resolved']['building']
-        unless  building
-          raise "ERROR: Building information for top container: #{t} must exist"
-        end
         location = {location: building} 
         tc[t] = top_containers[t].merge(location)
       end

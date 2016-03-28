@@ -1,5 +1,9 @@
 require 'spec_helper'
 
+def create_resource_with_repo_id(repo_id)
+	Resource.create_from_json(build(:json_resource), :repo_id => repo_id)
+end
+
 describe 'NYU Custom Marcxml Export' do 
  
 	describe 'datafield 853 mapping' do
@@ -27,8 +31,10 @@ describe 'NYU Custom Marcxml Export' do
      # default create behavior is to 
      # create arbitrary indicator and barcode values
      let (:top_container) { create(:json_top_container) }
+     let (:repo_code) { 'tamwag' }
 	  before(:each) do
-	  	 resource = create_resource
+	  	 repo_id = make_test_repo(code = repo_code)
+	  	 resource = create_resource_with_repo_id(repo_id)
 	  	 archival_object = create(:json_archival_object, 
 	  	  		                    "resource" => {"ref" => resource.uri},
 	  	  	                       :level => "file", 
@@ -51,7 +57,7 @@ describe 'NYU Custom Marcxml Export' do
      it "maps the top container barcode value to subfield 'p' if barcode exists" do
        @marc.should have_tag "datafield[@tag='863']/subfield[@code='p']" => "#{top_container.barcode}"
      end
-
+     # write a test to raise an error if indicator doesn't exist
   	  context 'there is no barcode in the top container' do
   		 let (:barcode)    { nil }
 	  	 let (:top_container) { create(:json_top_container, 'barcode' => barcode) }
@@ -111,5 +117,11 @@ describe 'NYU Custom Marcxml Export' do
         @marc.should have_tag "datafield[@tag='949']/subfield[@code='p']" => "#{top_container.barcode}"
       end
 
+      describe 'check repo code' do
+
+      	it "raises an error if repo code is not one of the allowed values" do
+        	  @marc.should have_tag "datafield[@tag='949']/subfield[@code='p']" => "#{top_container.barcode}"
+      	end
+   	end
    end
 end

@@ -49,7 +49,7 @@ class MARCCustomFieldSerialize
     subfields_hsh[1] = {code: '8', value: '1' }
     subfields_hsh[2] = {code: 'a', value: 'Box' }
     subfield_list = get_subfields(subfields_hsh)
-    #Extra_fields << DataField.new('853', '0', '0', subfield_list)
+  
     DataField.new('853', '0', '0', subfield_list)
   end
 
@@ -87,19 +87,21 @@ class MARCCustomFieldSerialize
   end
 
   def get_repo_code_value
-    repo_code = {}
+    record_repo_value = @record.aspace_record['repository']['_resolved']['repo_code']
+    repo_code = nil
     subfields = {}
-    case @record.aspace_record['repository']['_resolved']['repo_code']
-    when 'tamwag'
-      repo_code = { b: 'BTAM', c: 'TAM' }
-    when 'fales'
-      repo_code = { b: 'BFALE', c: 'FALES'}
-    when 'archives'
-      repo_code = { b: 'BOBST', c: 'ARCH' }
-    when 'test'
-      repo_code = { b: 'TEST', c: 'TEST' }
-    else
-      repo_code = { b: "ERROR - unrecognized code" }
+    allowed_values = {}
+    allowed_values['tamwag'] = { b: 'BTAM', c: 'TAM' }
+    allowed_values['fales'] = { b: 'BFALE', c: 'FALES'}
+    allowed_values['archives'] = { b: 'BOBST', c: 'ARCH' }
+    allowed_values.each_key { |code|
+      case @record.aspace_record['repository']['_resolved']['repo_code']
+      when code
+        repo_code = allowed_values[code]
+      end
+    }
+    unless repo_code
+      raise "ERROR: Repo code must be one of these: #{allowed_values.keys} and not this value: #{record_repo_value}"
     end
     repo_code.each_key{ |code|
        position = code.to_s == 'b' ? 2 : 3
@@ -117,7 +119,7 @@ class MARCCustomFieldSerialize
       j_other_ids << @record.aspace_record['id_2']
       j_other_ids << @record.aspace_record['id_3']
       j_other_ids.unshift(j_id) # adding the first id as the first element of the array
-      j_other_ids.compact!.join(".")
+      j_other_ids.compact!
       j_other_ids = j_other_ids.join(".")
     end
     # if no other ids, assign id_0 else assign the whole array of ids
