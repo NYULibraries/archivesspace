@@ -4,19 +4,23 @@ def create_resource_with_repo_id(repo_id)
 	Resource.create_from_json(build(:json_resource), :repo_id => repo_id)
 end
 
-def create_top_container_with_location(bldg, uri)
-	unless bldg and uri
-		raise "ERROR: need values for bldg and uri"
+def create_top_container_with_location(bldg, resource_uri)
+	unless bldg and resource_uri
+		raise "ERROR: need values for bldg and resource_uri"
 	end
 	location = create(:json_location, :building => bldg)
    loc_hash = {'ref' => location.uri, 'status' => 'current', 'start_date' => '2000-01-01' }
    loc_top_container = create(:json_top_container,
         								'container_locations' => [loc_hash]
         							  )
-	loc_archival_object = create(:json_archival_object, 
-	  	  		                    "resource" => {"ref" => uri},
-	  	  	                       :level => "file", 
-	  	  	                       "instances" => [build_instance(loc_top_container)])
+   create_archival_object(loc_top_container, resource_uri)
+end
+
+def create_archival_object(top_container, resource_uri)
+	create(:json_archival_object,
+		    "resource" => {"ref" => resource_uri},
+		    :level => "file",
+		    "instances" => [build_instance(top_container)])
 end
 
 describe 'NYU Custom Marcxml Export' do 
@@ -48,12 +52,13 @@ describe 'NYU Custom Marcxml Export' do
      let (:top_container) { create(:json_top_container) }
      let (:repo_code) { 'tamwag' }
      let (:repo_id) { make_test_repo(code = repo_code) }
+     let (:resource) { create_resource_with_repo_id(repo_id) }
 	  before(:each) do
-	  	 resource = create_resource_with_repo_id(repo_id)
 	  	 archival_object = create(:json_archival_object, 
 	  	  		                    "resource" => {"ref" => resource.uri},
 	  	  	                       :level => "file", 
 	  	  	                       "instances" => [build_instance(top_container)])
+
 	    @marc = get_marc(resource)
 	  end
 
@@ -76,8 +81,8 @@ describe 'NYU Custom Marcxml Export' do
   	  context 'there is no barcode in the top container' do
   		 let (:barcode)    { nil }
 	  	 let (:top_container) { create(:json_top_container, 'barcode' => barcode) }
+	  	 let (:resource) { create_resource_with_repo_id(repo_id) }
 	  	 before(:each) do
-	  	   resource = create_resource_with_repo_id(repo_id)
 	  	  	archival_object = create(:json_archival_object, 
 	  	  		                      "resource" => {"ref" => resource.uri},
 	  	  	                         :level => "file", 
