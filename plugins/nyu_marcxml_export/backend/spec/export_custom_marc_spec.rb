@@ -104,7 +104,6 @@ describe 'NYU Custom Marcxml Export' do
 	  	  	                       :level => "file", 
 	  	  	                       "instances" => [build_instance(top_container)])
 	     @marc = get_marc(resource)
-	     binding.remote_pry
 	  end
 	   it "has the correct indicator attribute values" do
 	 	   @marc.should have_tag("datafield[@tag='949'][@ind1='0'][@ind2='']")
