@@ -82,14 +82,12 @@ describe 'NYU Custom Marcxml Export' do
   		 let (:barcode)    { nil }
 	  	 let (:top_container) { create(:json_top_container, 'barcode' => barcode) }
 	  	 let (:resource) { create_resource_with_repo_id(repo_id) }
-	  	 before(:each) do
-	  	  	archival_object = create(:json_archival_object, 
+       it "subfield 'p' should not exist without a barcode" do
+       	archival_object = create(:json_archival_object, 
 	  	  		                      "resource" => {"ref" => resource.uri},
 	  	  	                         :level => "file", 
 	  	  	                         "instances" => [build_instance(top_container)])
 	      @marc = get_marc(resource)
-	    end
-       it "subfield 'p' should not exist without a barcode" do
          @marc.should_not have_tag("datafield[@tag='863']/subfield[@code='p']")
        end
      end
@@ -216,5 +214,18 @@ describe 'NYU Custom Marcxml Export' do
       		end
       	end
       end
+      context 'there is no barcode in the top container' do
+  		 let (:barcode)    { nil }
+	  	 let (:top_container) { create(:json_top_container, 'barcode' => barcode) }
+	  	 let (:resource) { create_resource_with_repo_id(repo_id) }
+       it "subfield 'p' should not exist without a barcode" do
+       	archival_object = create(:json_archival_object, 
+	  	  		                      "resource" => {"ref" => resource.uri},
+	  	  	                         :level => "file", 
+	  	  	                         "instances" => [build_instance(top_container)])
+	      @marc = get_marc(resource)
+         @marc.should_not have_tag("datafield[@tag='949']/subfield[@code='p']")
+       end
+     end
    end
 end
