@@ -154,5 +154,67 @@ describe 'NYU Custom Marcxml Export' do
 	      @marc = get_marc(resource)
 	      @marc.should have_tag "datafield[@tag='949']/subfield[@code='s']" => ""
       end
+
+      it "maps 'BTAM' to subfield 'b'" do
+      	@marc.should have_tag "datafield[@tag='949']/subfield[@code='b']" => "BTAM"
+      end
+
+      it "maps 'TAM' to subfield 'c'" do
+      	@marc.should have_tag "datafield[@tag='949']/subfield[@code='c']" => "TAM"
+      end
+
+      describe 'check subfields for different repo codes' do
+      	let (:top_container) { create(:json_top_container) }
+      	context "if repo code is 'fales'" do
+      		let (:repo_code) { 'fales' }
+   			let (:repo_id) { make_test_repo(code = repo_code) }
+   			let (:resource) { create_resource_with_repo_id(repo_id) }
+	   		before(:each) do
+	  	  			archival_object = create(:json_archival_object, 
+	  	  		                     "resource" => {"ref" => resource.uri},
+	  	  	                        :level => "file", 
+	  	  	                        "instances" => [build_instance(top_container)])
+	     			@marc = get_marc(resource)
+	  			end
+	  			it "maps 'BFALE' to subfield 'b'" do
+      		  @marc.should have_tag "datafield[@tag='949']/subfield[@code='b']" => "BFALE"
+      		end
+
+      		it "maps 'FALES' to subfield 'c'" do
+      			@marc.should have_tag "datafield[@tag='949']/subfield[@code='c']" => "FALES"
+      		end
+      	end
+      	context "if repo code is 'archives'" do
+      		let (:repo_code) { 'archives' }
+   			let (:repo_id) { make_test_repo(code = repo_code) }
+   			let (:resource) { create_resource_with_repo_id(repo_id) }
+	   		before(:each) do
+	  	  			archival_object = create(:json_archival_object, 
+	  	  		                     "resource" => {"ref" => resource.uri},
+	  	  	                        :level => "file", 
+	  	  	                        "instances" => [build_instance(top_container)])
+	     			@marc = get_marc(resource)
+	  			end
+	  			it "maps 'BOBST' to subfield 'b'" do
+      		  @marc.should have_tag "datafield[@tag='949']/subfield[@code='b']" => "BOBST"
+      		end
+
+      		it "maps 'ARCH' to subfield 'c'" do
+      			@marc.should have_tag "datafield[@tag='949']/subfield[@code='c']" => "ARCH"
+      		end
+      	end
+      	context "if repo code is not amongst the allowed values" do
+      		let (:repo_id) { make_test_repo(code = 'foo') }
+   			let (:resource) { create_resource_with_repo_id(repo_id) }
+      		it 'outputs an error message if repo code is not one of the allowed values' do 
+	   			archival_object = create(:json_archival_object, 
+	  	  		                         "resource" => {"ref" => resource.uri},
+	  	  	                            :level => "file", 
+	  	  	                            "instances" => [build_instance(top_container)])
+	     	   	@marc = get_marc(resource)
+	  				@marc.should have_tag("aspace_export_error")
+      		end
+      	end
+      end
    end
 end
