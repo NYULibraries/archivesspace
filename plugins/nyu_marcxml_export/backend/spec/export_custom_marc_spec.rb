@@ -23,6 +23,17 @@ def create_archival_object(top_container, resource_uri)
 		    "instances" => [build_instance(top_container)])
 end
 
+def create_resource_without_barcode(repo_id)
+	barcode = nil
+	top_container = create(:json_top_container, 'barcode' => barcode)
+	resource = create_resource_with_repo_id(repo_id)
+	archival_object = create(:json_archival_object,
+									 "resource" => {"ref" => resource.uri},
+									 :level => "file",
+									 "instances" => [build_instance(top_container)])
+	resource
+end
+
 describe 'NYU Custom Marcxml Export' do
 
 	describe 'datafield 853 mapping' do
@@ -78,19 +89,12 @@ describe 'NYU Custom Marcxml Export' do
        @marc.should have_tag "datafield[@tag='863']/subfield[@code='p']" => "#{top_container.barcode}"
      end
 
-  	  context 'there is no barcode in the top container' do
-  		 let (:barcode)    { nil }
-	  	 let (:top_container) { create(:json_top_container, 'barcode' => barcode) }
-	  	 let (:resource) { create_resource_with_repo_id(repo_id) }
-       it "subfield 'p' should not exist without a barcode" do
-       	archival_object = create(:json_archival_object,
-	  	  		                      "resource" => {"ref" => resource.uri},
-	  	  	                         :level => "file",
-	  	  	                         "instances" => [build_instance(top_container)])
-	      @marc = get_marc(resource)
-         @marc.should_not have_tag("datafield[@tag='863']/subfield[@code='p']")
-       end
-     end
+	  it "subfield 'p' should not exist without a barcode in the top container" do
+			resource = create_resource_without_barcode(repo_id)
+	      marc = get_marc(resource)
+         marc.should_not have_tag("subfield[@code='p']")
+		end
+
    end
 
    describe 'datafield 949 mapping' do
@@ -214,20 +218,11 @@ describe 'NYU Custom Marcxml Export' do
       		end
       	end
       end
-      context 'there is no barcode in the top container' do
-  		 	let (:barcode)    { nil }
-	  	 	let (:top_container) { create(:json_top_container,
-													'barcode' => barcode) }
-	  	 	let (:resource) { create_resource_with_repo_id(repo_id) }
-       	it "subfield 'p' should not exist without a barcode" do
-       		archival_object = create(:json_archival_object,
-	  	  		                     "resource" => {"ref" => resource.uri},
-	  	  	                        :level => "file",
-	  	  	                        "instances" => [build_instance(top_container)])
-	      	@marc = get_marc(resource)
-         	@marc.should_not have_tag ("datafield[@tag='949']/subfield[@code='p']")
-       	end
-     end
+		it "subfield 'p' should not exist without a barcode in the top container" do
+ 			resource = create_resource_without_barcode(repo_id)
+ 	      marc = get_marc(resource)
+         marc.should_not have_tag("subfield[@code='p']")
+ 		end
 
 	  context 'there are multiple parts in the resource identifier' do
 		 	let(:ids) { ['id0', 'id1', 'id2', 'id3'] }
