@@ -5,9 +5,9 @@ class MARCCustomFieldSerialize
 
   def initialize(record)
     @record = record
- 
+
   end
-   
+
   def leader_string
     result = @record.leader_string
   end
@@ -49,7 +49,7 @@ class MARCCustomFieldSerialize
     subfields_hsh[1] = {code: '8', value: '1' }
     subfields_hsh[2] = {code: 'a', value: 'Box' }
     subfield_list = get_subfields(subfields_hsh)
-  
+
     DataField.new('853', '0', '0', subfield_list)
   end
 
@@ -61,7 +61,7 @@ class MARCCustomFieldSerialize
     subfields_hsh[2] = {code: 'a', value: info[:indicator] }
     subfields_hsh[3] = {code: 'p', value: info[:barcode] }  if info[:barcode]
     subfield_list = get_subfields(subfields_hsh)
-    
+
     DataField.new('863', '', '', subfield_list)
   end
 
@@ -76,13 +76,13 @@ class MARCCustomFieldSerialize
     subfields_hsh[9] = {code: 'p', value: info[:barcode]} if info[:barcode]
     subfields_hsh[10] = {code: 'w', value: "Box #{info[:indicator]}" }
     subfields_hsh[11] = {code: 'e', value: info[:indicator]}
-    subfields_hsh[5] = check_multiple_ids 
-    subfields_hsh[8] = get_location(info[:location]) if info[:location]
+    subfields_hsh[5] = check_multiple_ids
+    subfields_hsh[8] = get_location(info[:location])
     # merge repo code hash with existing subfield code hash
     subfields_hsh.merge!(get_repo_code_value)
 
     subfield_list = get_subfields(subfields_hsh)
-    
+
     DataField.new('949','0','',subfield_list)
   end
 
@@ -101,7 +101,8 @@ class MARCCustomFieldSerialize
       end
     }
     unless repo_code
-      raise "ERROR: Repo code must be one of these: #{allowed_values.keys} and not this value: #{record_repo_value}"
+      raise "ERROR: Repo code must be one of these: #{allowed_values.keys}
+            and not this value: #{record_repo_value}"
     end
     repo_code.each_key{ |code|
        position = code.to_s == 'b' ? 2 : 3
@@ -114,18 +115,20 @@ class MARCCustomFieldSerialize
   def check_multiple_ids
     j_id = @record.aspace_record['id_0']
     j_other_ids = []
-    if @record.aspace_record['id_1'] or @record.aspace_record['id_2'] or @record.aspace_record['id_3']
+    if @record.aspace_record['id_1'] or @record.aspace_record['id_2'] or
+      @record.aspace_record['id_3']
       j_other_ids << @record.aspace_record['id_1']
       j_other_ids << @record.aspace_record['id_2']
       j_other_ids << @record.aspace_record['id_3']
-      j_other_ids.unshift(j_id) # adding the first id as the first element of the array
+       # adding the first id as the first element of the array
+      j_other_ids.unshift(j_id)
       j_other_ids.compact!
       j_other_ids = j_other_ids.join(".")
     end
     # if no other ids, assign id_0 else assign the whole array of ids
     j_id = j_other_ids.size == 0 ? j_id : j_other_ids
 
-    {code: 'j', value: j_id } 
+    {code: 'j', value: j_id }
 
   end
 
