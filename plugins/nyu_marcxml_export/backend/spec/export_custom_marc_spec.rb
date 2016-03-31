@@ -37,23 +37,21 @@ end
 describe 'NYU Custom Marcxml Export' do
 
 	describe 'datafield 853 mapping' do
+		let (:repo_code) { 'tamwag' }
+      let (:repo_id) { make_test_repo(code = repo_code) }
+		let (:resource) { create_resource_with_repo_id(repo_id) }
+	   let (:marc) { get_marc(resource) }
+	  	it 'should have the correct indicator attribute values' do
+	 	 marc.should have_tag("datafield[@tag='853'][@ind1='0'][@ind2='0']")
+     	end
 
-	  before(:each) do
-	    resource = create_resource
-	    @marc = get_marc(resource)
-	  end
+	  	it "maps the value '1' to subfield '8'" do
+       marc.should have_tag "datafield[@tag='853']/subfield[@code='8']" => '1'
+     	end
 
-	  it 'should have the correct indicator attribute values' do
-	 	 @marc.should have_tag("datafield[@tag='853'][@ind1='0'][@ind2='0']")
-     end
-
-	  it "maps the value '1' to subfield '8'" do
-       @marc.should have_tag "datafield[@tag='853']/subfield[@code='8']" => '1'
-     end
-
-     it "maps the value 'Box' to subfield 'a'" do
-       @marc.should have_tag "datafield[@tag='853']/subfield[@code='a']" => 'Box'
-     end
+     	it "maps the value 'Box' to subfield 'a'" do
+       marc.should have_tag "datafield[@tag='853']/subfield[@code='a']" => 'Box'
+     	end
 
    end
 
