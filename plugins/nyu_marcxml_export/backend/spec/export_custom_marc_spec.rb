@@ -34,6 +34,17 @@ def create_resource_without_barcode(repo_id)
 	resource
 end
 
+def generate_subfields_position_hash(tag)
+	subfields = {}
+	subfields['853'] = ['8','a']
+	subfields['863'] = ['8','a','p']
+	subfields['949'] = ['a','b','c','t','j','m','i','s','p','w','e']
+	unless subfields.has_key?(tag)
+		raise "ERROR: tag: #{tag} must be one of these values"
+	end
+	subfields[tag]
+end
+
 describe 'NYU Custom Marcxml Export' do
 
 	describe 'datafield 853 mapping' do
@@ -139,7 +150,7 @@ describe 'NYU Custom Marcxml Export' do
         @marc.should have_tag "datafield[@tag='949']/subfield[@code='p']" => "#{top_container.barcode}"
       end
 
-      it "there is a blank subfield 's' if there's no location information" do
+      it "should have a blank subfield 's' if there's no location information" do
          @marc.should have_tag "datafield[@tag='949']/subfield[@code='s']" => ""
    	end
 
@@ -149,7 +160,7 @@ describe 'NYU Custom Marcxml Export' do
 	      @marc.should have_tag "datafield[@tag='949']/subfield[@code='s']" => "VH"
       end
 
-      it "is a blank subfield 's' if location is other than Clancy Cullen" do
+      it "should have a blank subfield 's' if location is other than Clancy Cullen" do
       	create_top_container_with_location("foo",resource.uri)
 	      @marc = get_marc(resource)
 	      @marc.should have_tag "datafield[@tag='949']/subfield[@code='s']" => ""
@@ -266,6 +277,16 @@ describe 'NYU Custom Marcxml Export' do
 				marc = get_marc(resource)
 			   marc.should have_tag "datafield[@tag='949']/subfield[@code='j']" => "#{ids[0]}.#{ids[1]}.#{ids[2]}.#{ids[3]}"
 			end
+	  end
+
+	  it 'maps all subfields in the correct order' do
+		  subfields = @marc.xpath("//xmlns:datafield[@tag='949']//xmlns:subfield")
+		  correct_position = generate_subfields_position_hash('949')
+		  subfields = subfields.to_a
+		  subfields.each_index { |position|
+			  subfield_code = subfields[position].attributes['code'].value
+			  expect(subfield_code).to eq(correct_position[position])
+		  }
 	  end
    end
 end
