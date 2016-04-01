@@ -64,6 +64,16 @@ describe 'NYU Custom Marcxml Export' do
        marc.should have_tag "datafield[@tag='853']/subfield[@code='a']" => 'Box'
      	end
 
+		it 'maps all 853 subfields in the correct order' do
+ 		  subfields = marc.xpath("//xmlns:datafield[@tag='853']//xmlns:subfield")
+ 		  correct_position = generate_subfields_position_hash('853')
+ 		  subfields = subfields.to_a
+ 		  subfields.each_index { |position|
+ 			  subfield_code = subfields[position].attributes['code'].value
+ 			  expect(subfield_code).to eq(correct_position[position])
+ 		  }
+ 	  end
+
    end
 
    describe 'datafield 863 mapping' do
@@ -103,7 +113,15 @@ describe 'NYU Custom Marcxml Export' do
 	      marc = get_marc(resource)
          marc.should_not have_tag("subfield[@code='p']")
 		end
-
+		it 'maps all 863 subfields in the correct order' do
+ 		  subfields = @marc.xpath("//xmlns:datafield[@tag='863']//xmlns:subfield")
+ 		  correct_position = generate_subfields_position_hash('863')
+ 		  subfields = subfields.to_a
+ 		  subfields.each_index { |position|
+ 			  subfield_code = subfields[position].attributes['code'].value
+ 			  expect(subfield_code).to eq(correct_position[position])
+ 		  }
+ 	  end
    end
 
    describe 'datafield 949 mapping' do
@@ -279,7 +297,7 @@ describe 'NYU Custom Marcxml Export' do
 			end
 	  end
 
-	  it 'maps all subfields in the correct order' do
+	  it 'maps all 949 subfields in the correct order' do
 		  subfields = @marc.xpath("//xmlns:datafield[@tag='949']//xmlns:subfield")
 		  correct_position = generate_subfields_position_hash('949')
 		  subfields = subfields.to_a
