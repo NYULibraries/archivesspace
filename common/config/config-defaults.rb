@@ -30,7 +30,7 @@ AppConfig[:indexer_solr_timeout_seconds] = 300
 
 AppConfig[:allow_other_unmapped] = false
 
-AppConfig[:db_url] = proc { AppConfig.demo_db_url }
+AppConfig[:db_url] = "jdbc:mysql://localhost:3306/archivesspace?user=as&password=as123&useUnicode=true&characterEncoding=UTF-8"
 AppConfig[:db_url_redacted] = proc { AppConfig[:db_url].gsub(/(user|password)=(.*?)&/, '\1=[REDACTED]&') }
 AppConfig[:db_max_connections] = proc { 20 + (AppConfig[:indexer_thread_count] * 2) }
 
@@ -137,7 +137,7 @@ AppConfig[:report_pdf_font_paths] = proc { ["#{AppConfig[:backend_url]}/reports/
 AppConfig[:report_pdf_font_family] = "\"DejaVu Sans\", sans-serif"
 
 # Plug-ins to load. They will load in the order specified
-AppConfig[:plugins] = ['local',  'lcnaf', 'aspace-public-formats']
+AppConfig[:plugins] = ['local',  'lcnaf', 'aspace-public-formats', 'ead_export_plugin']
 
 # URL to direct the feedback link
 # You can remove this from the footer by making the value blank.
@@ -182,7 +182,7 @@ AppConfig[:max_location_range] = 1000
 # ASpace backend will not start if the db's schema_info version is not set
 # correctly for this version of ASPACE. This is to ensure that all the
 # migrations have run and completed before starting the app. You can override
-# this check here. Do so at your own peril. 
+# this check here. Do so at your own peril.
 AppConfig[:ignore_schema_info_check] = false
 
 # Jasper Reports
@@ -202,7 +202,7 @@ AppConfig[:resequence_on_startup] = false
 
 # This is a URL that points to some demo data that can be used for testing,
 # teaching, etc. To use this, set an OS environment variable of ASPACE_DEMO = true
-AppConfig[:demo_data_url] = "https://s3-us-west-2.amazonaws.com/archivesspacedemo/latest-demo-data.zip" 
+AppConfig[:demo_data_url] = "https://s3-us-west-2.amazonaws.com/archivesspacedemo/latest-demo-data.zip"
 
 # Expose external ids in the frontend
 AppConfig[:show_external_ids] = false

@@ -21,7 +21,7 @@ gem "rufus-lru", "1.0.5"
 gem "net-ldap", "0.6.1"
 gem "puma", "2.8.2"
 gem "i18n", ">= 0.6.4"
-
+gem "pry-remote"
 gem "axlsx", "2.0.1"
 
 gem "warbler", "1.4.9", :group => :build
