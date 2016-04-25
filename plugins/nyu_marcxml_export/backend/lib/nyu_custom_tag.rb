@@ -17,7 +17,6 @@ class NYUCustomTag
   end
 
   private
-  attr_writer :error_messages
     # sorts keys by order
     # creates a new subfield instance
     def set_subfields
