@@ -90,16 +90,25 @@ class MARCCustomFieldSerialize
   end
 
   def get_record_repo_value
-    @record.aspace_record['repository']['_resolved']['repo_code']
+    # returning the value in a consistent case
+    code = @record.aspace_record['repository']['_resolved']['repo_code']
+    value = code == code.downcase ? code : code.downcase
+    value
   end
-  def get_repo_code_value
-    record_repo_value = get_record_repo_value
-    repo_code = nil
-    subfields = {}
+
+  def get_allowed_values
     allowed_values = {}
     allowed_values['tamwag'] = { b: 'BTAM', c: 'TAM' }
     allowed_values['fales'] = { b: 'BFALE', c: 'FALES'}
     allowed_values['archives'] = { b: 'BOBST', c: 'ARCH' }
+    allowed_values
+  end
+
+  def get_repo_code_value
+    record_repo_value = get_record_repo_value
+    repo_code = nil
+    subfields = {}
+    allowed_values = get_allowed_values
     allowed_values.each_key { |code|
       case record_repo_value
       when code
