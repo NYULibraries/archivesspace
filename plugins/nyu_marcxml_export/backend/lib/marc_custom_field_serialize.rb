@@ -44,13 +44,19 @@ class MARCCustomFieldSerialize
 
   def add_853_tag
     subfields_hsh = {}
+    datafields_hsh = {}
+    datafields_hsh = {
+      tag: '853',
+      ind1: '0',
+      ind2: '0'
+    }
     # have to have a hash by position as the key
     # since the subfield positions matter
     subfields_hsh[1] = {code: '8', value: '1' }
     subfields_hsh[2] = {code: 'a', value: 'Box' }
-    subfield_list = get_subfields(subfields_hsh)
-
-    DataField.new('853', '0', '0', subfield_list)
+    datafield = NYUCustomTag.new(datafields_hsh,subfields_hsh)
+    datafield.add_tag
+    #DataField.new('853', '0', '0', subfield_list)
   end
 
   def add_863_tag(info)
