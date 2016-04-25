@@ -41,59 +41,59 @@ class MARCCustomFieldSerialize
     }
     subfield_list
   end
+  def get_datafield_hash(tag,ind1,ind2)
+    {tag: tag, ind1: ind1, ind2: ind2}
+  end
 
   def add_853_tag
     subfields_hsh = {}
     datafields_hsh = {}
-    datafields_hsh = {
-      tag: '853',
-      ind1: '0',
-      ind2: '0'
-    }
+    datafield_hsh = get_datafield_hash('853','0','0')
     # have to have a hash by position as the key
     # since the subfield positions matter
     subfields_hsh[1] = {code: '8', value: '1' }
     subfields_hsh[2] = {code: 'a', value: 'Box' }
-    datafield = NYUCustomTag.new(datafields_hsh,subfields_hsh)
+    datafield = NYUCustomTag.new(datafield_hsh,subfields_hsh)
     datafield.add_tag
-    #DataField.new('853', '0', '0', subfield_list)
   end
 
   def add_863_tag(info)
     subfields_hsh = {}
+    datafield_hsh = get_datafield_hash('863','','')
     # have to have a hash by position as the key
     # since the subfield positions matter
     subfields_hsh[1] = {code: '8', value: "1.#{info[:indicator]}" }
     subfields_hsh[2] = {code: 'a', value: info[:indicator] }
     subfields_hsh[3] = {code: 'p', value: info[:barcode] }  if info[:barcode]
-    subfield_list = get_subfields(subfields_hsh)
-
-    DataField.new('863', '', '', subfield_list)
+    datafield = NYUCustomTag.new(datafield_hsh,subfields_hsh)
+    datafield.add_tag
   end
 
   def add_949_tag(info)
     subfields_hsh = {}
+    datafield_hsh = get_datafield_hash('949','0','')
     # have to have a hash by position as the key
     # since the subfield positions matter
     subfields_hsh[1] = {code: 'a', value: 'NNU'}
-    subfields_hsh[6] = {code: 'm', value: 'MIXED'}
     subfields_hsh[4] = {code: 't', value: '4'}
+    subfields_hsh[5] = check_multiple_ids
+    subfields_hsh[6] = {code: 'm', value: 'MIXED'}
     subfields_hsh[7] = {code: 'i', value: '04'}
+    subfields_hsh[8] = get_location(info[:location])
     subfields_hsh[9] = {code: 'p', value: info[:barcode]} if info[:barcode]
     subfields_hsh[10] = {code: 'w', value: "Box #{info[:indicator]}" }
     subfields_hsh[11] = {code: 'e', value: info[:indicator]}
-    subfields_hsh[5] = check_multiple_ids
-    subfields_hsh[8] = get_location(info[:location])
     # merge repo code hash with existing subfield code hash
     subfields_hsh.merge!(get_repo_code_value)
-
-    subfield_list = get_subfields(subfields_hsh)
-
-    DataField.new('949','0','',subfield_list)
+    datafield = NYUCustomTag.new(datafield_hsh,subfields_hsh)
+    datafield.add_tag
   end
 
+  def get_record_repo_value
+    @record.aspace_record['repository']['_resolved']['repo_code']
+  end
   def get_repo_code_value
-    record_repo_value = @record.aspace_record['repository']['_resolved']['repo_code']
+    record_repo_value = get_record_repo_value
     repo_code = nil
     subfields = {}
     allowed_values = {}
@@ -101,7 +101,7 @@ class MARCCustomFieldSerialize
     allowed_values['fales'] = { b: 'BFALE', c: 'FALES'}
     allowed_values['archives'] = { b: 'BOBST', c: 'ARCH' }
     allowed_values.each_key { |code|
-      case @record.aspace_record['repository']['_resolved']['repo_code']
+      case record_repo_value
       when code
         repo_code = allowed_values[code]
       end
