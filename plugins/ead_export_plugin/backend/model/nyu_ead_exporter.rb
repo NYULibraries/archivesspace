@@ -121,7 +121,9 @@ class EADSerializer < ASpaceExport::Serializer
 
 
   end
-
+  def customize_ead_data(custom_text,data)
+    custom_text + data
+  end
   def serialize_eadheader(data, xml, fragments)
     eadheader_atts = {:findaidstatus => data.finding_aid_status,
                       :repositoryencoding => "iso15511",
@@ -150,7 +152,11 @@ class EADSerializer < ASpaceExport::Serializer
           xml.titleproper("type" => "filing") { sanitize_mixed_content(data.finding_aid_filing_title, xml, fragments)} unless data.finding_aid_filing_title.nil?
           xml.titleproper {  sanitize_mixed_content(titleproper, xml, fragments) }
           xml.subtitle {  sanitize_mixed_content(data.finding_aid_subtitle, xml, fragments) } unless data.finding_aid_subtitle.nil?
-          xml.author { sanitize_mixed_content(data.finding_aid_author, xml, fragments) }  unless data.finding_aid_author.nil?
+          if data.finding_aid_author
+            author = data.finding_aid_author
+            author = customize_ead_data("Collection processed by ",author)
+            xml.author { sanitize_mixed_content(author, xml, fragments) }
+          end 
           xml.sponsor { sanitize_mixed_content( data.finding_aid_sponsor, xml, fragments) } unless data.finding_aid_sponsor.nil?
 
         }
