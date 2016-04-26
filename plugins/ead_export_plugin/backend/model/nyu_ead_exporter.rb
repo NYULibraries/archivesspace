@@ -1,5 +1,6 @@
 require 'nokogiri'
 require 'securerandom'
+require 'time'
 
 class EADSerializer < ASpaceExport::Serializer
   serializer_for :ead
@@ -156,7 +157,7 @@ class EADSerializer < ASpaceExport::Serializer
             author = data.finding_aid_author
             author = customize_ead_data("Collection processed by ",author)
             xml.author { sanitize_mixed_content(author, xml, fragments) }
-          end 
+          end
           xml.sponsor { sanitize_mixed_content( data.finding_aid_sponsor, xml, fragments) } unless data.finding_aid_sponsor.nil?
 
         }
@@ -212,7 +213,9 @@ class EADSerializer < ASpaceExport::Serializer
       }
 
       xml.profiledesc {
-        creation = "This finding aid was produced using ArchivesSpace on <date>#{Time.now}</date>."
+        # generates time as 2016-03-16T11:56-0400Z and the
+        # gsub removes the 'Z'
+        creation = "This finding aid was produced using ArchivesSpace <date>#{Time.now.utc.iso8601.gsub!('Z','')}</date>"
         xml.creation {  sanitize_mixed_content( creation, xml, fragments) }
 
         if (val = data.finding_aid_language)
