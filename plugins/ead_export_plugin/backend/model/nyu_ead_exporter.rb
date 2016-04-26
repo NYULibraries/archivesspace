@@ -43,11 +43,7 @@ class EADSerializer < ASpaceExport::Serializer
 
 
             if (val = data.language)
-              xml.langmaterial {
-                xml.language(:langcode => val) {
-                  xml.text I18n.t("enumerations.language_iso639_2.#{val}", :default => val)
-                }
-              }
+              xml.langmaterial { xml.language(:langcode => val) }
             end
 
             if (val = data.repo.name)
