@@ -133,23 +133,23 @@ class EADSerializer < ASpaceExport::Serializer
       case note['type']
       when 'dimensions', 'physfacet'
         xml.physdesc(audatt) {
-          xml.send(note['type'], att) {
-            sanitize_mixed_content( content, xml, fragments, ASpaceExport::Utils.include_p?(note['type'])  )
-          }
-        }
-      when 'langmaterial'
-        label = { :label => "Language of Materials note" }
-        additional_att = audatt.merge(label)
-        lang_att = att.merge(additional_att)
-        xml.send(note['type'], lang_att) {
-          sanitize_mixed_content(content, xml, fragments,ASpaceExport::Utils.include_p?(note['type']))
+          generate_xml(content, xml, fragments, note['type'], att)
         }
       else
-        xml.send(note['type'], att.merge(audatt)) {
-          sanitize_mixed_content(content, xml, fragments,ASpaceExport::Utils.include_p?(note['type']))
-        }
+        att.merge!(audatt)
+        if note['type'] == 'langmaterial'
+          label = { :label => "Language of Materials note" }
+          att.merge!(label)
+        end
+        generate_xml(content, xml, fragments, note['type'], att)
       end
     end
+  end
+
+  def generate_xml(content, xml, fragments, node, attributes)
+    xml.send(node, attributes) {
+      sanitize_mixed_content(content, xml, fragments,ASpaceExport::Utils.include_p?(node))
+    }
   end
 
   def customize_ead_data(custom_text,data)
