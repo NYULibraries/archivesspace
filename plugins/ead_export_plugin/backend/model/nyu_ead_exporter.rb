@@ -118,6 +118,40 @@ class EADSerializer < ASpaceExport::Serializer
 
 
   end
+
+  def serialize_did_notes(data, xml, fragments)
+    data.notes.each do |note|
+      next if note["publish"] === false && !@include_unpublished
+      next unless data.did_note_types.include?(note['type'])
+
+      audatt = note["publish"] === false ? {:audience => 'internal'} : {}
+      content = ASpaceExport::Utils.extract_note_text(note, @include_unpublished)
+
+      att = { :id => prefix_id(note['persistent_id']) }.reject {|k,v| v.nil? || v.empty? || v == "null" }
+      att ||= {}
+
+      case note['type']
+      when 'dimensions', 'physfacet'
+        xml.physdesc(audatt) {
+          xml.send(note['type'], att) {
+            sanitize_mixed_content( content, xml, fragments, ASpaceExport::Utils.include_p?(note['type'])  )
+          }
+        }
+      when 'langmaterial'
+        label = { :label => "Language of Materials note" }
+        additional_att = audatt.merge(label)
+        lang_att = att.merge(additional_att)
+        xml.send(note['type'], lang_att) {
+          sanitize_mixed_content(content, xml, fragments,ASpaceExport::Utils.include_p?(note['type']))
+        }
+      else
+        xml.send(note['type'], att.merge(audatt)) {
+          sanitize_mixed_content(content, xml, fragments,ASpaceExport::Utils.include_p?(note['type']))
+        }
+      end
+    end
+  end
+
   def customize_ead_data(custom_text,data)
     custom_text + data
   end
@@ -180,16 +214,6 @@ class EADSerializer < ASpaceExport::Serializer
             xml.address {
               data.addresslines.each do |line|
                 xml.addressline { sanitize_mixed_content( line, xml, fragments) }
-              end
-              if data.repo.url
-                xml.addressline ( "URL: " ) {
-                  xml.extptr ( {
-                          "xlink:href" => data.repo.url,
-                          "xlink:title" => data.repo.url,
-                          "xlink:type" => "simple",
-                          "xlink:show" => "new"
-                          } )
-                 }
               end
             }
           end
