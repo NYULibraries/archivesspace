@@ -291,23 +291,23 @@ describe 'MARC Export' do
     end
 
     it "sets record/controlfield[@tag='008']/text()[7..10] with resource.dates[0]['begin']" do
-      @marc2.at("record/controlfield").should have_inner_text(/^.{7}1900/)
+      @marc2.at("record/controlfield[@tag='008']").should have_inner_text(/^.{7}1900/)
     end
 
     it "sets record/controlfield[@tag='008']/text()[11..14] with resource.dates[0]['end']" do
-      @marc3.at("record/controlfield").should have_inner_text(/^.{11}1850/)
+      @marc3.at("record/controlfield[@tag='008']").should have_inner_text(/^.{11}1850/)
     end
 
     it "sets record/controlfield[@tag='008']/text()[15..16] with 'xx'" do
-      @marc1.at("record/controlfield").should have_inner_text(/^.{15}xx/)
+      @marc1.at("record/controlfield[@tag='008']").should have_inner_text(/^.{15}xx/)
     end
 
     it "sets record/controlfield[@tag='008']/text()[35..37] with resource.language" do
-      @marc1.at("record/controlfield").should have_inner_text(Regexp.new("^.{35}#{@resource1.language}"))
+      @marc1.at("record/controlfield[@tag='008']").should have_inner_text(Regexp.new("^.{35}#{@resource1.language}"))
     end
 
     it "sets record/controlfield[@tag='008']/text()[38..39] with ' d'" do
-      @marc1.at("record/controlfield").should have_inner_text(/.{38}\sd/)
+      @marc1.at("record/controlfield[@tag='008']").should have_inner_text(/.{38}\sd/)
     end
 
     it "maps repository.org_code to datafield[@tag='040' and @ind1=' ' and @ind2=' '] subfields a and c" do
