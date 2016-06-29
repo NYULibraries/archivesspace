@@ -89,7 +89,9 @@ describe 'Exports controller' do
     resp.should_not match(/australia/)
   end
 
-
+=begin
+# commenting this block out because this functionality has been
+# removed from aspace ead export
   it "includes unpublished records in EAD exports upon request" do
 
     resource = create(:json_resource)
@@ -114,7 +116,7 @@ describe 'Exports controller' do
     resp.should match(/australia/)
     resp.should match(/audience=\"internal\"/)
   end
-
+=end
 
   it "lets you export a resource in MARC 21" do
     res = create(:json_resource)
