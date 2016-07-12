@@ -98,14 +98,14 @@ describe 'MARC Export' do
       if date.expression
         @marc.should have_tag "datafield[@tag='245']/subfield[@code='f']" => "#{date.expression}"
       else
-        @marc.should have_tag "datafield[@tag='245']/subfield[@code='f']" => "#{date.begin} - #{date.end}"
+        @marc.should have_tag "datafield[@tag='245']/subfield[@code='f']" => "#{date.begin}-#{date.end}"
       end
     end
 
 
     it "maps the first bulk date to subfield 'g'" do
       date = @dates.find{|d| d.date_type == 'bulk'}
-      @marc.should have_tag "datafield[@tag='245']/subfield[@code='g']" => "#{date.begin} - #{date.end}"
+      @marc.should have_tag "datafield[@tag='245']/subfield[@code='g']" => "#{date.begin}-#{date.end}"
     end
 
 
